@@ -1,6 +1,6 @@
 @SmartTaskOrchestrator_HostAddress = http://localhost:5008
 
-GET {{SmartTaskOrchestrator_HostAddress}}/weatherforecast/
+GET {{SmartTaskOrchestrator_HostAddress}}/
 Accept: application/json
 
 ###
