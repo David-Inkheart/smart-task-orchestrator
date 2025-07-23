@@ -2,5 +2,3 @@
 
 GET {{SmartTaskOrchestrator_HostAddress}}/
 Accept: application/json
-
-###
