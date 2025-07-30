@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Domain.ValueObjects;
 
 namespace Domain.Entities;
@@ -23,6 +24,7 @@ public class TaskItem
     Title = string.Empty;
   }
 
+  [SetsRequiredMembers]
   public TaskItem(string title, string description, Priority priority)
   {
     Id = Guid.NewGuid();
@@ -42,10 +44,7 @@ public class TaskItem
   public void Update(string? title, string? description, Priority? priority = null)
   {
     if (!string.IsNullOrWhiteSpace(title))
-      Title = title;
-
-    if (title is { Length: > 3 } t)
-      Title = t.Trim();
+      Title = title.Trim();
 
     if (description != null)
       Description = description;

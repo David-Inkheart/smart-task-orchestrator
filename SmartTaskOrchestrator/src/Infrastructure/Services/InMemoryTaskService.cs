@@ -10,11 +10,7 @@ public class InMemoryTaskService : ITaskService
 
   public Task<TaskItem> CreateTaskAsync(string title, string? description, Priority priority)
   {
-    var task = new TaskItem(title, description ?? string.Empty, priority)
-    {
-      Title = title,
-      Description = description,
-    };
+    var task = new TaskItem(title, description ?? string.Empty, priority);
     tasks[task.Id] = task;
     return Task.FromResult(task);
   }
