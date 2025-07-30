@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <StyleCopAnalyzersSettingsFile>stylecop.json</StyleCopAnalyzersSettingsFile>
+    <NoWarn>$(NoWarn);SA0001;SA1518;SA1633;SA1201;SA1202;SA1101;SA1503;SA1507;SA1502;SA1600;SA1602</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Include all .cs files in sibling folders -->
+    <Compile Include="..\Application\**\*.cs" />
+    <Compile Include="..\Infrastructure\**\*.cs" />
+    <Compile Include="..\Domain\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Web-related -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+
+    <!-- Code style -->
+    <PackageReference Update="StyleCop.Analyzers" Version="1.2.0-beta.435" PrivateAssets="all" />
+
+    <!-- Remove these test-related packages from here -->
+    <!-- Test packages should live only in test projects -->
+  </ItemGroup>
+
+</Project>
