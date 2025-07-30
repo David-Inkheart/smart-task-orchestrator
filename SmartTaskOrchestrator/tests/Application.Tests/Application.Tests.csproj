@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <OutputPath>$(SolutionDir)/artifacts/tests/</OutputPath>
+    <OutputPath>artifacts/tests/</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
