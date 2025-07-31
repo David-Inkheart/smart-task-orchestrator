@@ -78,4 +78,147 @@ public class TaskServiceTests
     Assert.Equal(newDescription, updatedTask.Description);
     Assert.Equal(newPriority, updatedTask.Priority);
   }
+
+  [Fact]
+  public async Task AssignAgentToTask_AssignsAgentCorrectly()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var task = await service.CreateTaskAsync("Write tests", "We must TDD", Priority.Medium);
+    var agentId = "agent-007";
+
+    // Act
+    await service.AssignAgentToTask(task.Id, agentId);
+    var updatedTask = await service.GetTaskByIdAsync(task.Id);
+
+    // Assert
+    Assert.NotNull(updatedTask);
+    Assert.Equal(agentId, updatedTask!.AssignedAgent);
+  }
+
+
+  [Fact]
+  public async Task AssignAgentToTask_InvalidTaskId_DoesNothing()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var invalidId = Guid.NewGuid(); // Not in store
+    var agentId = "ghost-agent";
+
+    // Act
+    var ex = await Record.ExceptionAsync(() => service.AssignAgentToTask(invalidId, agentId));
+
+    // Assert
+    Assert.Null(ex); // Should quietly fail without throwing
+  }
+
+  [Fact]
+  public async Task AssignAgentToTask_AssignsSuccessfully_WhenTaskIsUnassigned()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var task = await service.CreateTaskAsync("Review PR", "Check null guards", Priority.Medium);
+    var agentId = "agent-001";
+
+    // Act
+    await service.AssignAgentToTask(task.Id, agentId);
+    var updated = await service.GetTaskByIdAsync(task.Id);
+
+    // Assert
+    Assert.Equal(agentId, updated!.AssignedAgent);
+  }
+
+  [Fact]
+  public async Task AssignAgentToTask_Throws_WhenAlreadyAssigned()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var task = await service.CreateTaskAsync("Refactor", "Split methods", Priority.High);
+    await service.AssignAgentToTask(task.Id, "agent-001");
+
+    // Act & Assert
+    var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        service.AssignAgentToTask(task.Id, "agent-002"));
+
+    Assert.Equal("Task is already assigned.", ex.Message);
+  }
+
+  [Fact]
+  public async Task AssignAgentToTask_Throws_WhenTaskIsCompleted()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var task = await service.CreateTaskAsync("Deploy fix", "Production deploy", Priority.High);
+    task.MarkAsCompleted(); // simulate external completion
+
+    // Act & Assert
+    var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        service.AssignAgentToTask(task.Id, "agent-003"));
+
+    Assert.Equal("Cannot assign a completed task.", ex.Message);
+  }
+
+  [Fact]
+  public async Task AssignAgentToTask_DoesNothing_WhenTaskNotFound()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var randomId = Guid.NewGuid();
+
+    // Act
+    var ex = await Record.ExceptionAsync(() =>
+        service.AssignAgentToTask(randomId, "agent-ghost"));
+
+    // Assert
+    Assert.Null(ex);
+  }
+
+  [Fact]
+  public async Task MarkTaskAsCompleted_UpdatesIsCompletedFlag()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var task = await service.CreateTaskAsync("Write docs", "Add XML comments", Priority.Low);
+
+    // Act
+    await service.MarkTaskAsCompleted(task.Id);
+    var updated = await service.GetTaskByIdAsync(task.Id);
+
+    // Assert
+    Assert.True(updated!.IsCompleted);
+    Assert.NotNull(updated.CompletedAt);
+    Assert.True((DateTime.UtcNow - updated.CompletedAt!.Value).TotalSeconds < 5);
+  }
+
+  [Fact]
+  public async Task MarkTaskAsCompleted_Throws_WhenTaskAlreadyCompleted()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var task = await service.CreateTaskAsync("Optimize code", "Use Span<T>", Priority.High);
+    await service.MarkTaskAsCompleted(task.Id);
+
+    // Act & Assert
+    var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        service.MarkTaskAsCompleted(task.Id));
+
+    Assert.Equal("Task is already completed.", ex.Message);
+  }
+
+  [Fact]
+  public async Task MarkTaskAsCompleted_DoesNothing_WhenTaskNotFound()
+  {
+    // Arrange
+    var service = new InMemoryTaskService();
+    var randomId = Guid.NewGuid();
+
+    // Act
+    var ex = await Record.ExceptionAsync(() =>
+        service.MarkTaskAsCompleted(randomId));
+
+    // Assert
+    Assert.Null(ex);
+  }
+
+
 }

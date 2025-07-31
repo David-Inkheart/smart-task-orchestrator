@@ -10,4 +10,9 @@ public interface ITaskService
   Task<TaskItem?> GetTaskByIdAsync(Guid id);
 
   Task UpdateTaskAsync(Guid id, string? title, string? description, Priority? priority = null);
+
+  public Task AssignAgentToTask(Guid taskId, string agentId);
+
+  Task MarkTaskAsCompleted(Guid taskId);
+
 }

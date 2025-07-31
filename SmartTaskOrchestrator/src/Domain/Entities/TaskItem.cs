@@ -18,6 +18,13 @@ public class TaskItem
   public Priority Priority { get; private set; }
 
   public TaskSummary? Summary { get; private set; }
+  public bool IsCompleted { get; private set; } = false;
+  public string? AssignedAgent { get; private set; }
+
+  public DateTime? UpdatedAt { get; private set; }
+
+  public DateTime? CompletedAt { get; private set; }
+
 
   private TaskItem() // for EF Core or deserialization
   {
@@ -43,13 +50,52 @@ public class TaskItem
   /// <param name="priority">The new priority. If null, the priority remains unchanged.</param>
   public void Update(string? title, string? description, Priority? priority = null)
   {
-    if (!string.IsNullOrWhiteSpace(title))
+    bool changed = false;
+
+    if (!string.IsNullOrWhiteSpace(title) && title.Trim() != Title)
+    {
       Title = title.Trim();
+      changed = true;
+    }
 
-    if (description != null)
+    if (description != null && description != Description)
+    {
       Description = description;
+      changed = true;
+    }
 
-    if (priority.HasValue)
+    if (priority.HasValue && priority.Value != Priority)
+    {
       Priority = priority.Value;
+      changed = true;
+    }
+
+    if (changed)
+      UpdatedAt = DateTime.UtcNow;
   }
+
+
+  public void MarkAsCompleted()
+  {
+    if (IsCompleted)
+      throw new InvalidOperationException("Task is already completed.");
+
+    IsCompleted = true;
+    UpdatedAt = DateTime.UtcNow;
+    CompletedAt = DateTime.UtcNow;
+  }
+
+  public void AssignTo(string agentId)
+  {
+    if (IsCompleted)
+      throw new InvalidOperationException("Cannot assign a completed task.");
+
+    if (!string.IsNullOrWhiteSpace(AssignedAgent))
+      throw new InvalidOperationException("Task is already assigned.");
+
+    AssignedAgent = agentId;
+    UpdatedAt = DateTime.UtcNow;
+  }
+
+
 }

@@ -30,4 +30,26 @@ public class InMemoryTaskService : ITaskService
 
     return Task.CompletedTask;
   }
+
+  public Task AssignAgentToTask(Guid taskId, string agentId)
+  {
+    if (tasks.TryGetValue(taskId, out var task))
+    {
+      task.AssignTo(agentId);
+    }
+
+    return Task.CompletedTask;
+  }
+
+  public Task MarkTaskAsCompleted(Guid taskId)
+  {
+    if (tasks.TryGetValue(taskId, out var task))
+    {
+      task.MarkAsCompleted(); // domain rule enforced here
+    }
+
+    return Task.CompletedTask;
+  }
+
+
 }
