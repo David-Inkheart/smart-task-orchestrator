@@ -1,6 +1,4 @@
-@SmartTaskOrchestrator_HostAddress = http://localhost:5008
+@SmartTaskOrchestrator_HostAddress = http://localhost:5001
 
 GET {{SmartTaskOrchestrator_HostAddress}}/
 Accept: application/json
-
-###
