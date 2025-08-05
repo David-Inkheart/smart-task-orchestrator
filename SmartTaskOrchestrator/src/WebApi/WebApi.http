@@ -1,4 +1,10 @@
-@SmartTaskOrchestrator_HostAddress = http://localhost:5001
+@SmartTaskOrchestrator_HostAddress = http://localhost:5000
 
-GET {{SmartTaskOrchestrator_HostAddress}}/
+# POST {{SmartTaskOrchestrator_HostAddress}}/tasks
+# Accept: application/json
+# Content-Type: application/json
+
+GET {{SmartTaskOrchestrator_HostAddress}}/swagger
 Accept: application/json
+Content-Type: application/json
+
