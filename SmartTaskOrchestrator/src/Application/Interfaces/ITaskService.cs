@@ -1,11 +1,12 @@
 namespace Application.Interfaces;
 
+using Application.DTOs;
 using Domain.Entities;
 using Domain.ValueObjects;
 
 public interface ITaskService
 {
-  Task<TaskItem> CreateTaskAsync(string title, string? description, Priority priority);
+  Task<TaskItem> CreateTaskAsync(CreateTaskRequest dto);
 
   Task<TaskItem?> GetTaskByIdAsync(Guid id);
 
@@ -14,5 +15,5 @@ public interface ITaskService
   public Task AssignAgentToTask(Guid taskId, string agentId);
 
   Task MarkTaskAsCompleted(Guid taskId);
-
+  Task<TaskItem[]> GetAllTasksAsync();
 }

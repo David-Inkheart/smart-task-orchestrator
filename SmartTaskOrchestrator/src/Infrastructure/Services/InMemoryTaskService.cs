@@ -1,5 +1,6 @@
 namespace Infrastructure.Services;
 
+using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -8,12 +9,25 @@ public class InMemoryTaskService : ITaskService
 {
   private readonly Dictionary<Guid, TaskItem> tasks = new();
 
+  private readonly IAIService? _aiService;
+
+  public async Task<TaskItem> CreateTaskAsync(CreateTaskRequest dto)
+  {
+    var priority = dto.Priority ?? await _aiService!.PredictPriorityAsync(dto.Description);
+
+    var task = new TaskItem(dto.Title, dto.Description ?? string.Empty, priority);
+
+    tasks[task.Id] = task;
+    return task;
+  }
+
+  // manual overload for the method above
   public Task<TaskItem> CreateTaskAsync(string title, string? description, Priority priority)
   {
-    var task = new TaskItem(title, description ?? string.Empty, priority);
-    tasks[task.Id] = task;
-    return Task.FromResult(task);
+    var dto = new CreateTaskRequest(title, description ?? "", priority);
+    return CreateTaskAsync(dto);
   }
+
 
   public Task<TaskItem?> GetTaskByIdAsync(Guid id)
   {
@@ -51,5 +65,16 @@ public class InMemoryTaskService : ITaskService
     return Task.CompletedTask;
   }
 
+  public Task<TaskItem[]> GetAllTasksAsync()
+  {
+    var allTasks = tasks.Values.ToArray();
+    return Task.FromResult(allTasks);
+  }
+
+
+  public InMemoryTaskService(IAIService aiService)
+  {
+    _aiService = aiService;
+  }
 
 }
