@@ -4,7 +4,13 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog FIRST, before anything else
+// 🔥 Add config layering
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
+
+// 🔥 Add Serilog early
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -13,30 +19,33 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Optional: validate scope lifetimes (good for dev sanity)
 builder.Host.UseDefaultServiceProvider(options =>
 {
-    options.ValidateScopes = true;
-    options.ValidateOnBuild = true;
+    options.ValidateScopes = builder.Environment.IsDevelopment();
+    options.ValidateOnBuild = builder.Environment.IsDevelopment();
 });
 
-// Register services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddScoped<IAIService, FakeAIService>();
-builder.Services.AddScoped<ITaskService, InMemoryTaskService>();
+// 🧠 Register services
+// builder.Services.AddScoped<IAIService, FakeAIService>();
+// builder.Services.AddScoped<ITaskService, InMemoryTaskService>();
 
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddSingleton<IAIService, FakeAIService>();
+builder.Services.AddSingleton<ITaskService, InMemoryTaskService>();
+
+
+// 🧪 Swagger (only in Dev or config-controlled)
+bool enableSwagger = builder.Configuration.GetValue<bool>("EnableSwagger");
+if (enableSwagger || builder.Environment.IsDevelopment())
 {
-    options.SwaggerDoc("v1", new()
+    builder.Services.AddSwaggerGen(options =>
     {
-        Title = "Smart Task Orchestrator API",
-        Version = "v1"
+        options.SwaggerDoc("v1", new() { Title = "Smart Task Orchestrator API", Version = "v1" });
     });
-});
+}
 
-// Optional but useful: HTTP logging (only logs if Serilog is configured to pick it up)
 builder.Services.AddHttpLogging(logging =>
 {
     logging.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
@@ -46,21 +55,16 @@ builder.Services.AddHttpLogging(logging =>
 
 var app = builder.Build();
 
-// Middleware order matters!
-if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+if (enableSwagger || app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseSerilogRequestLogging(); // <-- Adds nice structured request logs from Serilog
-
-app.UseHttpLogging();           // <-- Built-in HTTP logging (for request/response headers)
-
+app.UseHttpLogging();
+// app.UseHttpsRedirection();
 app.UseAuthorization();
-
-app.MapGet("/", () => "Welcome to Smart Task Orchestrator, v1");
-
 app.MapControllers();
+app.MapGet("/", () => $"Welcome to Smart Task Orchestrator - {app.Environment.EnvironmentName}");
 
 app.Run();

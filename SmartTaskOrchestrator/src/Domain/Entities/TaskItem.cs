@@ -97,5 +97,6 @@ public class TaskItem
     UpdatedAt = DateTime.UtcNow;
   }
 
+  public void SetSummary(TaskSummary summary) => Summary = summary;
 
 }

@@ -6,8 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <StyleCopAnalyzersSettingsFile>stylecop.json</StyleCopAnalyzersSettingsFile>
+    <GenerateBuildLog>true</GenerateBuildLog>
+    <BinaryLogger>Build.binlog</BinaryLogger>
     <NoWarn>$(NoWarn);SA0001;SA1518;SA1633;SA1201;SA1202;SA1101;SA1503;SA1507;SA1502;SA1600;SA1602</NoWarn>
   </PropertyGroup>
+
 
   <ItemGroup>
     <!-- Include all .cs files in sibling folders -->

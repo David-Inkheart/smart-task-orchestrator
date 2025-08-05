@@ -37,4 +37,15 @@ public class TasksController : ControllerBase
     var tasks = await _taskService.GetAllTasksAsync();
     return Ok(tasks);
   }
+
+  [HttpPost("{id}/summarize")]
+  public async Task<IActionResult> Summarize(Guid id)
+  {
+    var task = await _taskService.GetTaskByIdAsync(id);
+    if (task is null) return NotFound();
+
+    await _taskService.SummarizeTaskAsync(id);
+
+    return Ok(task); // Return the task with updated summary
+  }
 }

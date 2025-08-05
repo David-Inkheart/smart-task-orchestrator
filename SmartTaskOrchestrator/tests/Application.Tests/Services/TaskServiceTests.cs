@@ -230,5 +230,22 @@ public class TaskServiceTests
     Assert.Null(ex);
   }
 
+  [Fact]
+  public async Task SummarizeTaskAsync_GeneratesAndStoresSummary()
+  {
+    // Arrange
+    var aiService = new FakeAIService();
+    var taskService = new InMemoryTaskService(aiService);
+    var task = await taskService.CreateTaskAsync("Debug auth issue", "OAuth2 tokens failing in prod", Priority.High);
+
+    // Act
+    await taskService.SummarizeTaskAsync(task.Id);
+
+    // Assert
+    var updatedTask = await taskService.GetTaskByIdAsync(task.Id);
+    var summary = updatedTask?.Summary;
+    Assert.NotNull(summary);
+    Assert.Contains("summary", summary.Description, StringComparison.OrdinalIgnoreCase);
+  }
 
 }

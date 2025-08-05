@@ -16,4 +16,7 @@ public interface ITaskService
 
   Task MarkTaskAsCompleted(Guid taskId);
   Task<TaskItem[]> GetAllTasksAsync();
+
+  Task SummarizeTaskAsync(Guid taskId);
+
 }

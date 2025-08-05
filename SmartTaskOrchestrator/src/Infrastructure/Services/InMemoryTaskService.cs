@@ -77,4 +77,15 @@ public class InMemoryTaskService : ITaskService
     _aiService = aiService;
   }
 
+  public async Task SummarizeTaskAsync(Guid taskId)
+  {
+    if (tasks.TryGetValue(taskId, out var task))
+    {
+      var summary = await _aiService!.GenerateSummaryAsync(task.Title, task.Description ?? "");
+      var newSummary = new TaskSummary(task.Title, summary);
+      task.SetSummary(newSummary);
+    }
+  }
+
+
 }

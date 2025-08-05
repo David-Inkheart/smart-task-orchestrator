@@ -14,5 +14,10 @@ namespace Infrastructure.Services
 
       return Task.FromResult(priority);
     }
+
+    public Task<string> GenerateSummaryAsync(string title, string description)
+    {
+      return Task.FromResult($"This is a summary of: {title} - {description}");
+    }
   }
 }
